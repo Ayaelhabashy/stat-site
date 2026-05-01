@@ -26,7 +26,7 @@ function parseGroup(id) {
 }
 
 function mean(arr) {
-  return arr.reduce((a,b) => a + b, 0) / arr.length;
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
 
 function variance(arr, m) {
@@ -34,17 +34,16 @@ function variance(arr, m) {
 }
 
 function runANOVA() {
-  const g1 = parseGroup("g1");
-  const g2 = parseGroup("g2");
-  const g3 = parseGroup("g3");
 
-  const groups = [g1, g2, g3];
+  const groups = [
+    parseGroup("g1"),
+    parseGroup("g2"),
+    parseGroup("g3")
+  ];
 
-  // overall mean
   const all = groups.flat();
   const grandMean = mean(all);
 
-  // between-group variation
   let ssBetween = 0;
   let ssWithin = 0;
   let totalN = 0;
@@ -64,6 +63,22 @@ function runANOVA() {
 
   const F = msBetween / msWithin;
 
-  document.getElementById("result").innerText =
-    "F-statistic: " + F.toFixed(4);
+  // 🔥 p-value (F distribution)
+  const pValue = 1 - jStat.centralF.cdf(F, dfBetween, dfWithin);
+
+  document.getElementById("result").innerHTML = `
+    <b>ANOVA Results</b><br><br>
+
+    SS Between: ${ssBetween.toFixed(4)}<br>
+    SS Within: ${ssWithin.toFixed(4)}<br><br>
+
+    df Between: ${dfBetween}<br>
+    df Within: ${dfWithin}<br><br>
+
+    MS Between: ${msBetween.toFixed(4)}<br>
+    MS Within: ${msWithin.toFixed(4)}<br><br>
+
+    <b>F-statistic: ${F.toFixed(4)}</b><br>
+    <b>p-value: ${pValue.toFixed(6)}</b>
+  `;
 }
