@@ -1,62 +1,40 @@
-function parseGroup(id) {
-  return document.getElementById(id).value
-    .split(",")
-    .map(x => parseFloat(x.trim()))
-    .filter(x => !isNaN(x));
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ANOVA Calculator</title>
+  <link rel="stylesheet" href="style.css">
 
-function mean(arr) {
-  return arr.reduce((a,b) => a + b, 0) / arr.length;
-}
+  <!-- Stats library for p-value -->
+  <script src="https://cdn.jsdelivr.net/npm/jstat@1.9.6/dist/jstat.min.js"></script>
+</head>
 
-function variance(arr, m) {
-  return arr.reduce((sum, x) => sum + Math.pow(x - m, 2), 0);
-}
+<body>
 
-function runANOVA() {
-  const groups = [
-    parseGroup("g1"),
-    parseGroup("g2"),
-    parseGroup("g3")
-  ];
+<h1>One-Way ANOVA Calculator</h1>
 
-  const all = groups.flat();
-  const grandMean = mean(all);
+<div class="card">
 
-  let ssBetween = 0;
-  let ssWithin = 0;
-  let totalN = 0;
+  <p>Enter comma-separated values for each group:</p>
 
-  groups.forEach(g => {
-    const m = mean(g);
-    ssBetween += g.length * Math.pow(m - grandMean, 2);
-    ssWithin += variance(g, m);
-    totalN += g.length;
-  });
+  <label>Group 1:</label>
+  <input id="g1" placeholder="e.g. 5,6,7">
 
-  const dfBetween = groups.length - 1;
-  const dfWithin = totalN - groups.length;
+  <label>Group 2:</label>
+  <input id="g2" placeholder="e.g. 8,9,10">
 
-  const msBetween = ssBetween / dfBetween;
-  const msWithin = ssWithin / dfWithin;
+  <label>Group 3:</label>
+  <input id="g3" placeholder="e.g. 4,5,6">
 
-  const F = msBetween / msWithin;
+  <button onclick="runANOVA()">Calculate ANOVA</button>
 
-  // ✅ p-value using F distribution
-  const pValue = 1 - jStat.centralF.cdf(F, dfBetween, dfWithin);
+  <p id="result"></p>
 
-  document.getElementById("result").innerHTML = `
-    <b>ANOVA Results</b><br><br>
-    SS Between: ${ssBetween.toFixed(4)}<br>
-    SS Within: ${ssWithin.toFixed(4)}<br><br>
+</div>
 
-    df Between: ${dfBetween}<br>
-    df Within: ${dfWithin}<br><br>
+<a href="index.html">⬅ Back Home</a>
 
-    MS Between: ${msBetween.toFixed(4)}<br>
-    MS Within: ${msWithin.toFixed(4)}<br><br>
+<script src="script.js"></script>
 
-    <b>F-statistic: ${F.toFixed(4)}</b><br>
-    <b>p-value: ${pValue.toFixed(6)}</b>
-  `;
-}
+</body>
+</html>
