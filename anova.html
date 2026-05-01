@@ -1,35 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>ANOVA Calculator</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+function parseGroup(id) {
+  return document.getElementById(id).value
+    .split(",")
+    .map(x => parseFloat(x.trim()))
+    .filter(x => !isNaN(x));
+}
 
-<h1>One-Way ANOVA Calculator</h1>
+function mean(arr) {
+  return arr.reduce((a,b) => a + b, 0) / arr.length;
+}
 
-<div class="card">
+function variance(arr, m) {
+  return arr.reduce((sum, x) => sum + Math.pow(x - m, 2), 0);
+}
 
-  <p>Enter groups (comma-separated values):</p>
+function runANOVA() {
+  const groups = [
+    parseGroup("g1"),
+    parseGroup("g2"),
+    parseGroup("g3")
+  ];
 
-  <label>Group 1:</label>
-  <input id="g1" placeholder="e.g. 5,6,7">
+  const all = groups.flat();
+  const grandMean = mean(all);
 
-  <label>Group 2:</label>
-  <input id="g2" placeholder="e.g. 8,9,10">
+  let ssBetween = 0;
+  let ssWithin = 0;
+  let totalN = 0;
 
-  <label>Group 3:</label>
-  <input id="g3" placeholder="e.g. 4,5,6">
+  groups.forEach(g => {
+    const m = mean(g);
+    ssBetween += g.length * Math.pow(m - grandMean, 2);
+    ssWithin += variance(g, m);
+    totalN += g.length;
+  });
 
-  <button onclick="runANOVA()">Calculate ANOVA</button>
+  const dfBetween = groups.length - 1;
+  const dfWithin = totalN - groups.length;
 
-  <p id="result"></p>
+  const msBetween = ssBetween / dfBetween;
+  const msWithin = ssWithin / dfWithin;
 
-</div>
+  const F = msBetween / msWithin;
 
-<a href="index.html">⬅ Back Home</a>
+  // ✅ p-value using F distribution
+  const pValue = 1 - jStat.centralF.cdf(F, dfBetween, dfWithin);
 
-<script src="script.js"></script>
-</body>
-</html>
+  document.getElementById("result").innerHTML = `
+    <b>ANOVA Results</b><br><br>
+    SS Between: ${ssBetween.toFixed(4)}<br>
+    SS Within: ${ssWithin.toFixed(4)}<br><br>
+
+    df Between: ${dfBetween}<br>
+    df Within: ${dfWithin}<br><br>
+
+    MS Between: ${msBetween.toFixed(4)}<br>
+    MS Within: ${msWithin.toFixed(4)}<br><br>
+
+    <b>F-statistic: ${F.toFixed(4)}</b><br>
+    <b>p-value: ${pValue.toFixed(6)}</b>
+  `;
+}
