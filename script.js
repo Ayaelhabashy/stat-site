@@ -66,19 +66,47 @@ function runANOVA() {
   // 🔥 p-value (F distribution)
   const pValue = 1 - jStat.centralF.cdf(F, dfBetween, dfWithin);
 
-  document.getElementById("result").innerHTML = `
-    <b>ANOVA Results</b><br><br>
+ const ssTotal = ssBetween + ssWithin;
+const dfTotal = dfBetween + dfWithin;
 
-    SS Between: ${ssBetween.toFixed(4)}<br>
-    SS Within: ${ssWithin.toFixed(4)}<br><br>
+document.getElementById("result").innerHTML = `
+  <h3>ANOVA Table</h3>
 
-    df Between: ${dfBetween}<br>
-    df Within: ${dfWithin}<br><br>
+  <table border="1" style="margin:auto; border-collapse: collapse;">
+    <tr>
+      <th>Source</th>
+      <th>SS</th>
+      <th>df</th>
+      <th>MS</th>
+      <th>F</th>
+      <th>p-value</th>
+    </tr>
 
-    MS Between: ${msBetween.toFixed(4)}<br>
-    MS Within: ${msWithin.toFixed(4)}<br><br>
+    <tr>
+      <td>Between</td>
+      <td>${ssBetween.toFixed(4)}</td>
+      <td>${dfBetween}</td>
+      <td>${msBetween.toFixed(4)}</td>
+      <td>${F.toFixed(4)}</td>
+      <td>${pValue.toFixed(6)}</td>
+    </tr>
 
-    <b>F-statistic: ${F.toFixed(4)}</b><br>
-    <b>p-value: ${pValue.toFixed(6)}</b>
-  `;
-}
+    <tr>
+      <td>Within</td>
+      <td>${ssWithin.toFixed(4)}</td>
+      <td>${dfWithin}</td>
+      <td>${msWithin.toFixed(4)}</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+
+    <tr>
+      <td>Total</td>
+      <td>${ssTotal.toFixed(4)}</td>
+      <td>${dfTotal}</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+  </table>
+`;
