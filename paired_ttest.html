@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Paired T-Test</title>
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/jstat@1.9.6/dist/jstat.min.js"></script>
+</head>
+
+<body>
+
+<h1>Paired T-Test</h1>
+
+<div class="card">
+
+  <p>Enter paired data:</p>
+
+  <label>Before:</label>
+  <input id="before" placeholder="e.g. 5,6,7">
+
+  <label>After:</label>
+  <input id="after" placeholder="e.g. 6,7,8">
+
+  <button onclick="runPairedT()">Calculate</button>
+
+  <p id="result"></p>
+
+</div>
+
+<a href="index.html">⬅ Back Home</a>
+
+<script src="script.js"></script>
+
+</body>
+</html>
