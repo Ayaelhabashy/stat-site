@@ -1,9 +1,12 @@
+// ===============================
+// Z-SCORE
+// ===============================
 function calculateZ() {
-  const mean = parseFloat(document.getElementById("mean").value);
+  const meanVal = parseFloat(document.getElementById("mean").value);
   const std = parseFloat(document.getElementById("std").value);
   const value = parseFloat(document.getElementById("value").value);
 
-  if (isNaN(mean) || isNaN(std) || isNaN(value)) {
+  if (isNaN(meanVal) || isNaN(std) || isNaN(value)) {
     document.getElementById("result").innerText = "Please fill all fields.";
     return;
   }
@@ -13,11 +16,13 @@ function calculateZ() {
     return;
   }
 
-  const z = (value - mean) / std;
-
+  const z = (value - meanVal) / std;
   document.getElementById("result").innerText = "Z-score: " + z.toFixed(4);
 }
 
+// ===============================
+// HELPERS (ONLY ONCE, GLOBAL)
+// ===============================
 function parseGroup(id) {
   return document.getElementById(id).value
     .split(",")
@@ -33,6 +38,9 @@ function variance(arr, m) {
   return arr.reduce((sum, x) => sum + Math.pow(x - m, 2), 0);
 }
 
+// ===============================
+// ANOVA
+// ===============================
 function runANOVA() {
 
   const groups = [
@@ -63,71 +71,52 @@ function runANOVA() {
 
   const F = msBetween / msWithin;
 
-  // 🔥 p-value (F distribution)
   const pValue = 1 - jStat.centralF.cdf(F, dfBetween, dfWithin);
 
- const ssTotal = ssBetween + ssWithin;
-const dfTotal = dfBetween + dfWithin;
+  const ssTotal = ssBetween + ssWithin;
+  const dfTotal = dfBetween + dfWithin;
 
-document.getElementById("result").innerHTML = `
-  <h3>ANOVA Table</h3>
-
-  <table border="1" style="margin:auto; border-collapse: collapse;">
-    <tr>
-      <th>Source</th>
-      <th>SS</th>
-      <th>df</th>
-      <th>MS</th>
-      <th>F</th>
-      <th>p-value</th>
-    </tr>
-
-    <tr>
-      <td>Between</td>
-      <td>${ssBetween.toFixed(4)}</td>
-      <td>${dfBetween}</td>
-      <td>${msBetween.toFixed(4)}</td>
-      <td>${F.toFixed(4)}</td>
-      <td>${pValue.toFixed(6)}</td>
-    </tr>
-
-    <tr>
-      <td>Within</td>
-      <td>${ssWithin.toFixed(4)}</td>
-      <td>${dfWithin}</td>
-      <td>${msWithin.toFixed(4)}</td>
-      <td>-</td>
-      <td>-</td>
-    </tr>
-
-    <tr>
-      <td>Total</td>
-      <td>${ssTotal.toFixed(4)}</td>
-      <td>${dfTotal}</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-    </tr>
-  </table>
-`;
-
-function parseGroup(id) {
-  return document.getElementById(id).value
-    .split(",")
-    .map(x => parseFloat(x.trim()))
-    .filter(x => !isNaN(x));
-}
-
-function mean(arr) {
-  return arr.reduce((a,b) => a + b, 0) / arr.length;
-}
-
-function variance(arr, m) {
-  return arr.reduce((sum, x) => sum + Math.pow(x - m, 2), 0) / (arr.length - 1);
+  document.getElementById("result").innerHTML = `
+    <h3>ANOVA Table</h3>
+    <table border="1" style="margin:auto; border-collapse: collapse;">
+      <tr>
+        <th>Source</th>
+        <th>SS</th>
+        <th>df</th>
+        <th>MS</th>
+        <th>F</th>
+        <th>p-value</th>
+      </tr>
+      <tr>
+        <td>Between</td>
+        <td>${ssBetween.toFixed(4)}</td>
+        <td>${dfBetween}</td>
+        <td>${msBetween.toFixed(4)}</td>
+        <td>${F.toFixed(4)}</td>
+        <td>${pValue.toFixed(6)}</td>
+      </tr>
+      <tr>
+        <td>Within</td>
+        <td>${ssWithin.toFixed(4)}</td>
+        <td>${dfWithin}</td>
+        <td>${msWithin.toFixed(4)}</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>Total</td>
+        <td>${ssTotal.toFixed(4)}</td>
+        <td>${dfTotal}</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+    </table>
+  `;
 }
 
 // ===============================
-// Independent T-Test
+// INDEPENDENT T-TEST
 // ===============================
 function runIndependentT() {
 
@@ -140,28 +129,26 @@ function runIndependentT() {
   const m1 = mean(g1);
   const m2 = mean(g2);
 
-  const v1 = variance(g1, m1);
-  const v2 = variance(g2, m2);
+  const v1 = variance(g1, m1) / (n1 - 1);
+  const v2 = variance(g2, m2) / (n2 - 1);
 
-  // Welch's t-test (more general)
   const t = (m1 - m2) / Math.sqrt(v1/n1 + v2/n2);
 
   const df = Math.pow(v1/n1 + v2/n2, 2) /
-    ( (Math.pow(v1/n1,2)/(n1-1)) + (Math.pow(v2/n2,2)/(n2-1)) );
+    ((Math.pow(v1/n1,2)/(n1-1)) + (Math.pow(v2/n2,2)/(n2-1)));
 
   const p = 2 * (1 - jStat.studentt.cdf(Math.abs(t), df));
 
   document.getElementById("result").innerHTML = `
-    <h3>Independent T-Test Results</h3>
-
-    t-statistic: ${t.toFixed(4)}<br>
-    df: ${df.toFixed(2)}<br>
-    p-value: ${p.toFixed(6)}
+    <h3>Independent T-Test</h3>
+    t = ${t.toFixed(4)}<br>
+    df = ${df.toFixed(2)}<br>
+    p-value = ${p.toFixed(6)}
   `;
 }
 
 // ===============================
-// Paired T-Test
+// PAIRED T-TEST
 // ===============================
 function runPairedT() {
 
@@ -170,7 +157,7 @@ function runPairedT() {
 
   if (before.length !== after.length) {
     document.getElementById("result").innerText =
-      "Error: Both groups must have the same number of values.";
+      "Groups must have the same number of values.";
     return;
   }
 
@@ -189,10 +176,9 @@ function runPairedT() {
   const p = 2 * (1 - jStat.studentt.cdf(Math.abs(t), df));
 
   document.getElementById("result").innerHTML = `
-    <h3>Paired T-Test Results</h3>
-
-    t-statistic: ${t.toFixed(4)}<br>
-    df: ${df}<br>
-    p-value: ${p.toFixed(6)}
+    <h3>Paired T-Test</h3>
+    t = ${t.toFixed(4)}<br>
+    df = ${df}<br>
+    p-value = ${p.toFixed(6)}
   `;
 }
